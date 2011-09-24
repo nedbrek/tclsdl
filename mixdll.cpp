@@ -1,10 +1,20 @@
-#include <tcl.h>
 #include <windows.h>
+#include "tclparms.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_mixer.h"
 
+//----------------------------------------------------------------------------
 #define BUFFER 1024
 
+//----------------------------------------------------------------------------
+struct TclData
+{
+	Mix_Music *music_;
+
+	void init(void) { music_= NULL; }
+};
+
+//----------------------------------------------------------------------------
 /*void print_init_flags(int flags)
 {
 #define PFLAG(a) if(flags&MIX_INIT_##a) printf(#a " ")
@@ -22,13 +32,31 @@
 static
 int musicCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	Mix_Music *music = Mix_LoadMUS("commndr.mod");
-	if (!music)
+	if (objc == 1) return TCL_ERROR;
+
+	TclData *self = reinterpret_cast<TclData*>(cdata);
+
+	Parms p(interp, objv, unsigned(objc));
+	const char *subcmd = p.getStringParm(0);
+	if (strcmp(subcmd, "play") != 0)
+		return TCL_ERROR;
+
+	if (self->music_)
+	{
+		Mix_FreeMusic(self->music_);
+		self->music_ = NULL;
+	}
+
+	const char *file = p.getStringParm(1);
+	if (!file) return TCL_ERROR;
+
+	self->music_ = Mix_LoadMUS(file);
+	if (!self->music_)
 	{
 		return TCL_ERROR;
 	}
 
-	if (Mix_PlayMusic(music, -1) == -1)
+	if (Mix_PlayMusic(self->music_, -1) == -1)
 	{
 		return TCL_ERROR;
 	}
@@ -62,7 +90,9 @@ int Sdlmix_Init(Tcl_Interp *interp)
 
 	Tcl_Export(interp, ns, "*", 0);
 
-	Tcl_CreateObjCommand(interp, "sdl::music", musicCmd, NULL, NULL);
+	TclData *self = (TclData*)malloc(sizeof(TclData));
+	self->init();
+	Tcl_CreateObjCommand(interp, "sdl::music", musicCmd, self, NULL);
 
 	return TCL_OK;
 }

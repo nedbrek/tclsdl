@@ -7,11 +7,11 @@ Requires:
 
 Modify the Makefile to point to your Tcl and SDL installations and libs.
 
-Currently the mixer loads a local mod (not in repo), more functionality coming
-soon!
+Currently the mixer can play a local mod (not in repo), more functionality
+coming soon!
 
 % wish &
 % load ./sdlmix.dll
-% sdl::music
+% sdl::music play <file>
 (will play in a continuous loop)
 

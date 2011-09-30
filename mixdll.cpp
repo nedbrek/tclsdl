@@ -39,9 +39,6 @@ int musicCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
 	TclData *self = reinterpret_cast<TclData*>(cdata);
 
 	Parms p(interp, objv, unsigned(objc));
-	const char *subcmd = p.getStringParm(0);
-	if (strcmp(subcmd, "play") != 0)
-		return TCL_ERROR;
 
 	if (self->music_)
 	{
@@ -49,16 +46,16 @@ int musicCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
 		self->music_ = NULL;
 	}
 
-	const char *file = p.getStringParm(1);
+	const char *file = p.getStringParm(0);
 	if (!file) return TCL_ERROR;
 
 	self->music_ = Mix_LoadMUS(file);
 	if (!self->music_)
 	{
-		return TCL_ERROR;
+		return TCL_OK;
 	}
 
-	if (Mix_PlayMusic(self->music_, -1) == -1)
+	if (Mix_PlayMusic(self->music_, p[1]) == -1)
 	{
 		return TCL_ERROR;
 	}
@@ -90,11 +87,12 @@ int Sdlmix_Init(Tcl_Interp *interp)
 		ns = Tcl_CreateNamespace(interp, "sdl", NULL, NULL);
 	}
 
+	ns = Tcl_CreateNamespace(interp, "sdl::mix", NULL, NULL);
 	Tcl_Export(interp, ns, "*", 0);
 
 	TclData *self = (TclData*)malloc(sizeof(TclData));
 	self->init();
-	Tcl_CreateObjCommand(interp, "sdl::music", musicCmd, self, NULL);
+	Tcl_CreateObjCommand(interp, "sdl::mix::music", musicCmd, self, NULL);
 
 	return TCL_OK;
 }
@@ -110,22 +108,6 @@ int Sdlmix_Init(Tcl_Interp *interp)
 
 /*int WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	while (1)
-	{
-		while(Mix_PlayingMusic() || Mix_PausedMusic())
-		{
-			SDL_Event e;
-			while (SDL_PollEvent(&e))
-			{
-				if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
-					cleanExit();
-			}
-			SDL_Delay(0);
-		}
-
-		Mix_PlayMusic(music, 1);
-	}
-
 	Mix_FreeMusic(music);
 	Mix_CloseAudio();
 	SDL_Quit();

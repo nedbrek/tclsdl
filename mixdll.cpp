@@ -1,4 +1,6 @@
+#ifdef WIN32
 #include <windows.h>
+#endif
 #include "tclparms.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_mixer.h"

@@ -1,3 +1,5 @@
+.PHONY: all clean
+
 ### set for Mingw under Cygwin
 CXX:=i686-w64-mingw32-g++
 
@@ -24,4 +26,8 @@ sdlmix.dll: mixdll.o
 
 %.o:%.cpp
 	@$(CXX) $(CXXFLAGS) -o$@ -c $^
+
+clean:
+	@rm -f sdlmix.dll mixdll.o
+
 

@@ -6,6 +6,14 @@ Requires:
 2) SDL (http://www.libsdl.org/)
 3) SDL Mixer (http://www.libsdl.org/projects/SDL_mixer/)
 
+The version of SDL built with MinGW requires extra files when linked with C++
+code.
+
+So, either you need to run wish from a MinGW term (irritating), or you need
+two additional files in the current dir, or path.  They are:
+libgcc_s_dw2-1.dll
+libstdc++-6.dll
+
 Modify the Makefile to point to your Tcl and SDL installations and libs.
 
 Currently the mixer can play a local mod (not in repo), more functionality

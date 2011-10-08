@@ -13,7 +13,7 @@ struct TclData
 {
 	Mix_Music *music_;
 
-	void init(void) { music_= NULL; }
+	TclData(void) { music_= NULL; }
 };
 
 //----------------------------------------------------------------------------
@@ -63,6 +63,12 @@ int musicCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
 	return TCL_OK;
 }
 
+void destructor(ClientData clientData)
+{
+	delete reinterpret_cast<TclData*>(clientData);
+	SDL_Quit();
+}
+
 extern "C" int Sdlmix_Init(Tcl_Interp *interp);
 
 int Sdlmix_Init(Tcl_Interp *interp)
@@ -90,9 +96,8 @@ int Sdlmix_Init(Tcl_Interp *interp)
 	ns = Tcl_CreateNamespace(interp, "sdl::mix", NULL, NULL);
 	Tcl_Export(interp, ns, "*", 0);
 
-	TclData *self = (TclData*)malloc(sizeof(TclData));
-	self->init();
-	Tcl_CreateObjCommand(interp, "sdl::mix::music", musicCmd, self, NULL);
+	TclData *self = new TclData;
+	Tcl_CreateObjCommand(interp, "sdl::mix::music", musicCmd, self, destructor);
 
 	return TCL_OK;
 }

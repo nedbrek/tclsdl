@@ -22,6 +22,39 @@ public:
 		music_ = NULL;
 	}
 
+	~TclData(void)
+	{
+		if (music_)
+		{
+			Mix_FreeMusic(music_);
+		}
+	}
+
+	bool playMusic(const char *filename, int loops)
+	{
+		// clear current music
+		if (music_)
+		{
+			Mix_FreeMusic(music_);
+			music_ = NULL;
+		}
+
+		if (!filename) return false; // some weird error
+
+		music_ = Mix_LoadMUS(filename);
+		if (!music_)
+		{
+			return true; // clear music
+		}
+
+		if (Mix_PlayMusic(music_, loops) == -1)
+		{
+			return false; // some weird error
+		}
+
+		return true;
+	}
+
 	bool loadSound(const char *filename)
 	{
 		std::map<std::string, Mix_Chunk*>::const_iterator i =
@@ -64,26 +97,10 @@ int musicCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
 
 	Parms p(interp, objv, unsigned(objc));
 
-	if (self->music_)
-	{
-		Mix_FreeMusic(self->music_);
-		self->music_ = NULL;
-	}
-
-	const char *file = p.getStringParm(0);
-	if (!file) return TCL_ERROR;
-
-	self->music_ = Mix_LoadMUS(file);
-	if (!self->music_)
-	{
-		return TCL_OK;
-	}
-
-	if (Mix_PlayMusic(self->music_, p[1]) == -1)
+	if (!self->playMusic(p.getStringParm(0), p[1]))
 	{
 		return TCL_ERROR;
 	}
-
 	return TCL_OK;
 }
 

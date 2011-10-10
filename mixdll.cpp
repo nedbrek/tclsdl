@@ -4,6 +4,8 @@
 #include "tclparms.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_mixer.h"
+#include <map>
+#include <string>
 
 //----------------------------------------------------------------------------
 #define BUFFER 1024
@@ -12,8 +14,30 @@
 struct TclData
 {
 	Mix_Music *music_;
+	std::map<std::string, Mix_Chunk*> sounds_;
 
-	TclData(void) { music_= NULL; }
+public:
+	TclData(void)
+	{
+		music_ = NULL;
+	}
+
+	bool loadSound(const char *filename)
+	{
+		std::map<std::string, Mix_Chunk*>::const_iterator i =
+		  sounds_.find(filename);
+		if (i != sounds_.end())
+			return true;
+
+		Mix_Chunk *chk = Mix_LoadWAV(filename);
+		if (!chk)
+		{
+			return false;
+		}
+
+		sounds_.insert(std::make_pair(filename, chk));
+		return true;
+	}
 };
 
 //----------------------------------------------------------------------------

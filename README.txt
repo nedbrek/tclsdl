@@ -14,6 +14,9 @@ two additional files in the current dir, or path.  They are:
 libgcc_s_dw2-1.dll
 libstdc++-6.dll
 
+With the addition of more C++ code, I am unable to compile in Cygwin,
+only MinGW...
+
 Modify the Makefile to point to your Tcl and SDL installations and libs.
 
 Currently the mixer can play a local mod (not in repo), more functionality

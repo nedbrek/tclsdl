@@ -24,6 +24,11 @@ coming soon!
 
 % wish &
 % load ./sdlmix.dll
-% sdl::music play <file>
+% sdl::mix::music <file>
 (will play in a continuous loop)
+% sdl::mix::channels 16
+% sdl::mix::sound <file>
+(plays once)
+% sdl::mix::sound <file> -1 1
+(channel=-1 (first free), 1 loop (play twice))
 

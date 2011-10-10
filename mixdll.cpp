@@ -55,21 +55,32 @@ public:
 		return true;
 	}
 
-	bool loadSound(const char *filename)
+	Mix_Chunk* loadSound(const char *filename)
 	{
 		std::map<std::string, Mix_Chunk*>::const_iterator i =
 		  sounds_.find(filename);
+
 		if (i != sounds_.end())
-			return true;
+			return i->second;
 
 		Mix_Chunk *chk = Mix_LoadWAV(filename);
 		if (!chk)
 		{
-			return false;
+			return NULL;
 		}
 
 		sounds_.insert(std::make_pair(filename, chk));
-		return true;
+		return chk;
+	}
+
+	bool playSound(const char *filename, int chn, int loop, int ticks)
+	{
+		Mix_Chunk *chk = loadSound(filename);
+		if (!chk)
+			return false;
+
+		int ret = Mix_PlayChannelTimed(chn, chk, loop, ticks);
+		return ret != -1;
 	}
 };
 
@@ -101,6 +112,38 @@ int musicCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
 	{
 		return TCL_ERROR;
 	}
+	return TCL_OK;
+}
+
+static
+int chnCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	if (objc == 1) return TCL_ERROR;
+
+	//TclData *self = reinterpret_cast<TclData*>(cdata);
+
+	Parms p(interp, objv, unsigned(objc));
+
+	Mix_AllocateChannels(p[0]);
+
+	return TCL_OK;
+}
+
+static
+int sndCmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	if (objc == 1) return TCL_ERROR;
+
+	TclData *self = reinterpret_cast<TclData*>(cdata);
+
+	Parms p(interp, objv, unsigned(objc));
+	int loops = 0;
+	if (objc > 3)
+		loops = p[2];
+
+	if (!self->playSound(p.getStringParm(0), p[1], loops, p[3]))
+		return TCL_ERROR;
+
 	return TCL_OK;
 }
 
@@ -139,6 +182,8 @@ int Sdlmix_Init(Tcl_Interp *interp)
 
 	TclData *self = new TclData;
 	Tcl_CreateObjCommand(interp, "sdl::mix::music", musicCmd, self, destructor);
+	Tcl_CreateObjCommand(interp, "sdl::mix::channels", chnCmd, self, NULL);
+	Tcl_CreateObjCommand(interp, "sdl::mix::sound", sndCmd, self, NULL);
 
 	return TCL_OK;
 }

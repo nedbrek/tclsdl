@@ -36,12 +36,19 @@ proc entryGet {w} {
 }
 
 proc setTm {ct} {
+	set w .tMain.f$ct.lC
+	if {[$w cget -text] != 0} {
+		if {[tk_messageBox -message "Overwrite existing timer?" -type okcancel] ne "ok"} {
+			return
+		}
+	}
+
 	set h [entryGet .tMain.f$ct.eH]
 	set m [entryGet .tMain.f$ct.eM]
 	set s [entryGet .tMain.f$ct.eS]
 	set t [expr {$h*3600 + $m*60 + $s}]
 
-	.tMain.f$ct.lC configure -text $t
+	$w configure -text $t
 }
 
 #### gui

@@ -25,6 +25,7 @@ proc timerCB {} {
 	decList
 	after [expr {$t - [clock milliseconds]}] timerCB
 }
+timerCB
 
 ### gui helpers
 proc entryGet {w} {
